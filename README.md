@@ -19,6 +19,11 @@ Tap your phone to an NFC tag to instantly block selected apps. Tap again to rest
 - iPhone 7 or newer
 - Any NTAG213 NFC tag
 
+## Todo
+
+- Flesh out NFC functionality
+- Add more blocking configuration
+
 ---
 
 Inspired by [Brick](https://getbrick.app/)
