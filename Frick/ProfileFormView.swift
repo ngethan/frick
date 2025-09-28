@@ -1,5 +1,6 @@
 import SwiftUI
 import FamilyControls
+import ManagedSettings
 import MCEmojiPicker
 
 struct ProfileFormView: View {
@@ -61,43 +62,8 @@ struct ProfileFormView: View {
                         .foregroundColor(Theme.secondaryTextColor.opacity(0.8))
                 }
 
-                Section {
-                    Button(action: {
-                        showAppSelection = true
-                        HapticManager.impact(.light)
-                    }) {
-                        HStack {
-                            Label("Apps & Categories", systemImage: "app.badge")
-                                .foregroundColor(Theme.primaryTextColor)
-                            Spacer()
-                            HStack(spacing: 4) {
-                                if activitySelection.applicationTokens.count > 0 {
-                                    Text("\(activitySelection.applicationTokens.count)")
-                                        .foregroundColor(Theme.secondaryTextColor)
-                                }
-                                if activitySelection.categoryTokens.count > 0 {
-                                    Text("+\(activitySelection.categoryTokens.count)")
-                                        .foregroundColor(Theme.secondaryTextColor.opacity(0.6))
-                                }
-                                Image(systemName: "chevron.right")
-                                    .font(.system(size: 14))
-                                    .foregroundColor(Theme.secondaryTextColor.opacity(0.5))
-                            }
-                        }
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                } header: {
-                    Text("Blocking Configuration")
-                        .foregroundColor(Theme.secondaryTextColor.opacity(0.8))
-                } footer: {
-                    if activitySelection.applicationTokens.count == 0 && activitySelection.categoryTokens.count == 0 {
-                        Text("No apps or categories selected")
-                            .foregroundColor(Theme.secondaryTextColor.opacity(0.6))
-                    } else {
-                        Text("\(activitySelection.applicationTokens.count) apps, \(activitySelection.categoryTokens.count) categories")
-                            .foregroundColor(Theme.secondaryTextColor.opacity(0.6))
-                    }
-                }
+                appsSection
+                categoriesSection
 
                 // Delete Button (if editing)
                 if profile != nil {
@@ -179,6 +145,127 @@ struct ProfileFormView: View {
         } else {
             // For new profile: just need valid name
             return nameIsValid
+        }
+    }
+
+    @ViewBuilder
+    private var appsSection: some View {
+        if activitySelection.applicationTokens.count > 0 || activitySelection.categoryTokens.count == 0 {
+            Section {
+                appsContent
+            } header: {
+                appsHeader
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var appsContent: some View {
+        if activitySelection.applicationTokens.isEmpty {
+            HStack {
+                Text("No apps selected")
+                    .foregroundColor(Theme.secondaryTextColor)
+                Spacer()
+                Button("Add Apps") {
+                    showAppSelection = true
+                    HapticManager.impact(.light)
+                }
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(Theme.accentColor)
+            }
+        } else {
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(Array(activitySelection.applicationTokens).prefix(8), id: \.self) { token in
+                    appRow(for: token)
+                }
+
+                if activitySelection.applicationTokens.count > 8 {
+                    Text("... and \(activitySelection.applicationTokens.count - 8) more")
+                        .font(.system(size: 12))
+                        .foregroundColor(Theme.secondaryTextColor)
+                        .padding(.leading, 32)
+                }
+            }
+        }
+    }
+
+    private var appsHeader: some View {
+        HStack {
+            Text("Blocked Apps")
+                .foregroundColor(Theme.secondaryTextColor.opacity(0.8))
+            Spacer()
+            Button("Edit") {
+                showAppSelection = true
+                HapticManager.impact(.light)
+            }
+            .font(.system(size: 14, weight: .medium))
+            .foregroundColor(Theme.accentColor)
+        }
+    }
+
+    @ViewBuilder
+    private func appRow(for token: ApplicationToken) -> some View {
+        HStack {
+            Label(token)
+                .foregroundColor(Theme.primaryTextColor)
+            Spacer()
+        }
+    }
+
+    @ViewBuilder
+    private var categoriesSection: some View {
+        if activitySelection.categoryTokens.count > 0 || activitySelection.applicationTokens.count == 0 {
+            Section {
+                categoriesContent
+            } header: {
+                categoriesHeader
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var categoriesContent: some View {
+        if activitySelection.categoryTokens.isEmpty {
+            HStack {
+                Text("No categories selected")
+                    .foregroundColor(Theme.secondaryTextColor)
+                Spacer()
+                Button("Add Categories") {
+                    showAppSelection = true
+                    HapticManager.impact(.light)
+                }
+                .font(.system(size: 14, weight: .medium))
+                .foregroundColor(Theme.accentColor)
+            }
+        } else {
+            VStack(alignment: .leading, spacing: 8) {
+                ForEach(Array(activitySelection.categoryTokens), id: \.self) { token in
+                    categoryRow(for: token)
+                }
+            }
+        }
+    }
+
+    private var categoriesHeader: some View {
+        HStack {
+            Text("Blocked Categories")
+                .foregroundColor(Theme.secondaryTextColor.opacity(0.8))
+            Spacer()
+            Button("Edit") {
+                showAppSelection = true
+                HapticManager.impact(.light)
+            }
+            .font(.system(size: 14, weight: .medium))
+            .foregroundColor(Theme.accentColor)
+        }
+    }
+
+    @ViewBuilder
+    private func categoryRow(for token: ActivityCategoryToken) -> some View {
+        HStack {
+            Label(token)
+                .foregroundColor(Theme.primaryTextColor)
+            Spacer()
         }
     }
 
